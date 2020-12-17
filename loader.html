@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Calculator</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container{
+            width: 100%;
+            height: 100vh;
+            background: #333;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 50px;
+        }
+
+        .card{
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 500px;
+        }
+
+        .card h1{
+            text-align: center;
+            font-weight: 400;
+            padding-bottom: 20px;
+        }
+
+        .card-input-wrap{
+            width: 100%;
+            height: 45px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding-right: 20px;
+            border-radius: 5px;
+        }
+
+        .card-input-wrap input{
+            width: 85%;
+            float: right;
+            border: none;
+            height: 43px;
+            padding: 0 20px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .input-label{
+            height: 43px;
+            width: 15%;
+            float: left;
+            text-align: center;
+            line-height: 40px;
+            background: transparent;
+            background: #eee;
+            border-right: 1px solid #ccc;
+            border-radius: 5px 0 0 5px;
+        }
+
+        .years-to-pay{
+            width: 100%;
+            height: 45px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            padding: 0 20px;
+            outline: none;
+            border-radius: 5px;
+        }
+
+        .calculate{
+            display: inline-block;
+            text-decoration: none;
+            width: 100%;
+            height: 45px;
+            background: #333;
+            color: #fff;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            text-align: center;
+            line-height: 45px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+
+        .calculate:hover{
+            opacity: .95;
+        }
+
+        .card-input{
+            margin-bottom: 20px;
+        }
+
+        .card-output h2{
+            text-align: center;
+            font-weight: 400;
+            padding-bottom: 10px;
+        }
+
+        .output-wrap{
+            width: 100%;
+            height: 45px;
+            background: #eee;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .output-wrap:last-child{
+            margin-bottom: 0;
+        }
+
+        .output-label{
+            float: left;
+            height: 43px;
+            border-right: 1px solid #ccc;
+            width: 35%;
+            text-align: left;
+            padding-left: 10px;
+            line-height: 43px;
+        }
+
+        .output-wrap p{
+            display: inline-block;
+            float: right;
+            width: 65%;
+            height: 43px;
+            padding: 0 20px;
+            line-height: 43px;
+        }
+
+        .loading-screen{
+            width: 100%;
+            height: 197px;
+            display: none;
+        }
+
+        .card-output{
+            display: none;
+        }
+
+        .loading-screen h2{
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .spinner-wrap{
+            width: 100%;
+            height: 165px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner{
+            width: 100px;
+            height: 100px;
+            border: 10px solid #ddd;
+            border-radius: 100px;
+            border-top: 10px solid #333;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin{
+            0%{transform: rotate(0);}
+            100%{transform: rotate(360deg);}
+        }
+
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Loan Calculator</h1>
+            <div class="card-input">
+                <div class="card-input-wrap">
+                    <span class="input-label">$</span>
+                    <input type="number" class="loan" placeholder="Loan Amount">
+                </div>
+                <div class="card-input-wrap">
+                    <span class="input-label">%</span>
+                    <input type="number" class="interest" placeholder="Interest">
+                </div>
+                <input type="text" class="years-to-pay" placeholder="Years To Pay">
+                <a href="#" class="calculate">Calculate</a>
+            </div>
+
+            <div class="card-output">
+                <h2>Results</h2>
+                <div class="output-wrap">
+                    <span class="output-label">Monthly Payment</span>
+                    <p class="monthly"></p>
+                </div>
+                <div class="output-wrap">
+                    <span class="output-label">Total Payment</span>
+                    <p class="total-payment"></p>
+                </div>
+                <div class="output-wrap">
+                    <span class="output-label">Total Interest</span>
+                    <p class="total-interest"></p>
+                </div>
+            </div>
+
+            <div class="loading-screen">
+                <h2>Calculating...</h2>
+                <div class="spinner-wrap">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        startProgram();
+        function startProgram(){
+            let loan = document.querySelector(".loan");
+            let interest = document.querySelector(".interest");
+            let years = document.querySelector(".years-to-pay");
+            let calculate = document.querySelector(".calculate");
+            let monthlyPayment = document.querySelector(".monthly");
+            let totalPayment = document.querySelector(".total-payment")
+            let totalInterest = document.querySelector(".total-interest");
+            let spinner = document.querySelector(".loading-screen")
+            let cardOutput = document.querySelector(".card-output")
+
+            calculate.addEventListener("click", calculateLoan);
+
+            function calculateLoan(){
+
+                const principal = parseFloat(loan.value);
+                const calculatedInterest = parseFloat(interest.value) / 100 / 12;
+                const calculatedPayments = parseFloat(years.value) * 12;
+
+                // Compute monthly payment
+                const x = Math.pow(1 + calculatedInterest, calculatedPayments);
+                const monthly = (principal*x*calculatedInterest) / (x-1);
+
+                if(isFinite(monthly)){
+
+                    spinner.style.display = "block";
+                    cardOutput.style.display = "none"
+
+                    console.log("girdi");
+                    monthlyPayment.textContent =  `${monthly.toFixed(2)} $`;
+                    totalPayment.textContent = `${(monthly * calculatedPayments).toFixed(2)} $`;
+                    totalInterest.textContent = ((monthly * calculatedPayments)-principal).toFixed(2);
+
+                    setTimeout(function(){
+                    spinner.style.display = "none";
+                    cardOutput.style.display = "block"
+                },1000)
+                }else{
+                    alert("Please check your numbers")
+                } 
+            }
+        }
+    </script>
+</body>
+</html>
